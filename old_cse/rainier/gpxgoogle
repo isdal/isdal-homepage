@@ -1,0 +1,358 @@
+#!/usr/bin/perl -- # -*- Perl -*-
+
+# gpxgoogle -- Plot GPX tracks on a Google map
+#
+# $Id: gpxgoogle 933 2006-07-12 12:18:11Z ndw $
+#
+# Copyright (C) 2006 Norman Walsh
+#
+# Modified 2009-07-03 by Tomas Isdal, added support for gpx <cmt> comment 
+# tag. The comments show up on the map with a different icon.
+# 
+# This is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2, or (at your option)
+# any later version.
+#
+# It is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+# or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public
+# License for more details.
+#
+# Usage:
+#
+# gpxgoogle track.gpx [track.gpx ...]
+#
+# The script reads configuration information from ~/.gpxgoogle and then
+# reads one or more track files and builds a Google maps plot of those
+# tracks.
+
+use strict;
+use English;
+use XML::XPath;
+use XML::XPath::XMLParser;
+use Math::Trig qw(great_circle_distance deg2rad);
+use Time::Local;
+
+my $xp = XML::XPath->new('filename' => $ENV{'HOME'} . "/.gpxgoogle");
+my $cfg = ($xp->find('config')->get_nodelist())[0];
+die "Unexpected root element in .gpxgoogle config file" if !$cfg;
+
+my $title = ($cfg->find('title')->get_nodelist())[0]->string_value();
+my $key = ($cfg->find('key')->get_nodelist())[0]->string_value();
+my $width = ($cfg->find('width')->get_nodelist())[0]->string_value();
+my $height = ($cfg->find('height')->get_nodelist())[0]->string_value();
+my $units = ($cfg->find('units')->get_nodelist())[0]->string_value();
+my $icon = ($cfg->find('icon')->get_nodelist())[0]->string_value();
+my $colinLimit = ($cfg->find('colinear-threshold')->get_nodelist())[0]->string_value();
+
+my $eradius = undef;
+my $pradius = undef;
+if ($units eq 'mi') {
+    $eradius = 3963.189;
+    $pradius = 3949.901;
+} elsif ($units eq 'km') {
+    $eradius = 6378.135;
+    $pradius = 6356.750;
+} elsif ($units eq 'ft') {
+    $eradius = 3963.189 * 5280.0;
+    $pradius = 3949.901 * 5280.0;
+} elsif ($units eq 'm') {
+    $eradius = 6378135;
+    $pradius = 6356750;
+} else {
+    die "Invalid units: $units; must be 'mi', 'km', 'ft', or 'm'.\n";
+}
+
+my $usage = "$0 track.gpx [ track.gpx ... ]\n";
+my @tracks = ();
+my @tfile = ();
+my $minlat = +180;
+my $maxlat = -180;
+my $minlon = +180;
+my $maxlon = -180;
+
+my $trackcount = 0;
+foreach my $gpxfile (@ARGV) {
+    $trackcount++;
+    my $xp = XML::XPath->new('filename' => $gpxfile);
+    #$xp->set_namespace('gpx', 'http://www.topografix.com/GPX/1/0');
+    #XML::XPath is broken wrt namespaces :-(
+    my $gpx = ($xp->find('gpx')->get_nodelist())[0];
+    die "Unexpected root element in GPX file (possibly XML::XPath bug).\n"
+	if !$gpx;
+
+    print STDERR "Loaded: $gpxfile\n";
+
+    foreach my $track ($gpx->find('trk')->get_nodelist()) {
+	foreach my $seg ($track->find('trkseg')->get_nodelist()) {
+	    my $count = 0;
+	    my @points = ();
+
+	    foreach my $pt ($seg->find('trkpt')->get_nodelist()) {
+		$count++;
+
+		my $lat = $pt->getAttribute('lat');
+		my $lon = $pt->getAttribute('lon');
+
+		$minlat = $lat if $lat < $minlat;
+		$maxlat = $lat if $lat > $maxlat;
+		$minlon = $lon if $lon < $minlon;
+		$maxlon = $lon if $lon > $maxlon;
+
+		my $ele = ($pt->find('ele')->get_nodelist())[0];
+		$ele = $ele->string_value() if defined $ele;
+		$ele = "0" if !defined($ele);
+
+		my $comment = ($pt->find('cmt')->get_nodelist())[0];
+		$comment = $comment->string_value() if defined $comment;
+		$comment = "" if !defined($comment);
+		if ($comment ne "") {
+		    print STDERR "read comment: $comment\n";
+		} 
+
+		my $time = ($pt->find('time')->get_nodelist())[0];
+		$time = $time->string_value() if defined $time;
+		my $tsec = undef;
+
+		if ($time =~ /(\d+)-(\d+)-(\d+)T(\d+):(\d+):(\d+)/) {
+		    $tsec = timegm($6,$5,$4,$3,$2-1,$1-1900);
+		}
+
+		my $pt = {};
+		$pt->{'lat'} = $lat;
+		$pt->{'lon'} = $lon;
+		$pt->{'ele'} = $ele;
+		$pt->{'comment'} = $comment;
+		$pt->{'time'} = $time;
+		$pt->{'tsec'} = $tsec;
+		$pt->{'count'} = $count;
+		push (@points, $pt);
+	    }
+
+	    push (@tracks, \@points);
+	    push (@tfile, $trackcount);
+	}
+    }
+}
+
+my $clat = $minlat + (($maxlat - $minlat) / 2.0);
+my $clon = $minlon + (($maxlon - $minlon) / 2.0);
+
+# Trim out redundant and colinear points
+for (my $pos = 0; $pos <= $#tracks; $pos++) {
+    my @points = @{$tracks[$pos]};
+    my $ptnum = 1;
+    while ($ptnum <= $#points) {
+	my $blat = $points[$ptnum-1]->{'lat'};
+	my $blon = $points[$ptnum-1]->{'lon'};
+	my $lat = $points[$ptnum]->{'lat'};
+	my $lon = $points[$ptnum]->{'lon'};
+	if ($blat == $lat && $blon == $lon) {
+	    splice(@points, $ptnum, 1);
+	} else {
+	    $ptnum++;
+	}
+    }
+
+    $ptnum = 1;
+    while ($ptnum < $#points) {
+	my $blat = $points[$ptnum-1]->{'lat'};
+	my $blon = $points[$ptnum-1]->{'lon'};
+	my $lat = $points[$ptnum]->{'lat'};
+	my $lon = $points[$ptnum]->{'lon'};
+	my $elat = $points[$ptnum+1]->{'lat'};
+	my $elon = $points[$ptnum+1]->{'lon'};
+
+	my $colin = 0;
+	# x=lon, y=lat
+	# Handle vertical lines
+	if ($elon - $blon == 0) {
+	    my $d = abs($lon-$blon);
+	    if ($d < $colinLimit) {
+		splice(@points, $ptnum, 1);
+	    } else {
+		$ptnum++;
+	    }
+	} else {
+	    my $m = ($elat - $blat) / ($elon - $blon);
+	    my $b = $blat - ($m * $blon);
+	    my $colinlat = ($m*$lon) + $b;
+
+	    my $d = abs($lat-$colinlat);
+	    if ($d < $colinLimit) {
+		splice(@points, $ptnum, 1);
+	    } else {
+		$ptnum++;
+	    }
+	}
+    }
+
+    @{$tracks[$pos]} = @points;
+}
+
+print <<EOF1;
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>$title</title>
+    <script src="http://maps.google.com/maps?file=api&v=2&key=$key" type="text/javascript"></script>
+  </head>
+  <body>
+    <div id="map" style="width: $width; height: $height"></div>
+    <script type="text/javascript">
+    //<![CDATA[
+
+    $icon;
+
+    // Creates one of our tracking points
+    function createPoint(point) {
+       var opts = {
+         icon: icon,
+	 clickable: true,
+	 title: "Point #" + point.pointcount
+       }
+
+       if (point.comment != "") {
+	   opts = {
+	     icon: G_DEFAULT_ICON,
+	     clickable: true,
+	     title: point.comment
+	   }
+       }
+       var marker = new GMarker(point, opts);
+       GEvent.addListener(marker, "click", function() {
+
+	  var html = "<div>";
+	  if(point.comment == "") {
+	      html=html + "Track point #" + point.pointcount;
+	  } else  {
+	      html = html + point.comment;
+	  }
+
+          if (point.timestamp != '') {
+             html = html + " on<br />" + point.timestamp + "<br />";
+          } else {
+             html = html + "<br />";
+          }
+          html = html + "Lat: " + point.latitude + "<br />";
+          html = html + "Lon: " + point.longitude + "<br />";
+          html = html + "Ele: " + point.elevation + "<br />";
+          html = html + "Dis: " + point.distance + "$units<br />";
+          if (point.unitsperhour != 'unk') {
+             html = html + "Spd: " + point.unitsperhour + "$units/hr<br />";
+          }
+          html = html + "</div>";
+          marker.openInfoWindowHtml(html);
+       });
+       map.addOverlay(marker);
+    }
+
+    // Creates a popup marker
+    function createMarker(point,name) {
+	var marker = new GMarker(point);
+	var html = "<b>" + name + "</b>";
+	GEvent.addListener(marker, "click", function() {
+	    marker.openInfoWindowHtml(html);
+	});
+
+	return marker;
+    }
+
+    // Creates an extended GPoint
+    function trkPt(lat, lon, elev, time, dist, uph, count,comment) {
+      var pt = new GPoint(lon, lat);
+      pt.latitude = lat;
+      pt.longitude = lon;
+      pt.elevation = elev;
+      pt.timestamp = time;
+      pt.distance = dist;
+      pt.unitsperhour = uph;
+      pt.pointcount = count;
+      pt.comment = comment;
+      return pt;
+    }
+
+    if (GBrowserIsCompatible()) {
+      var map = new GMap2(document.getElementById("map"));
+      map.addControl(new GLargeMapControl());
+      map.addControl(new GMapTypeControl());
+      map.setCenter(new GLatLng($clat, $clon), 13);
+      map.setMapType(G_SATELLITE_MAP); 
+      map.enableScrollWheelZoom();
+
+      var points;
+EOF1
+
+for (my $pos = 0; $pos <= $#tracks; $pos++) {
+    my $points = $tracks[$pos];
+    my $tcount = $tfile[$pos];
+    my $count = 0;
+    my $plat = 0;
+    my $plon = 0;
+    my $psec = undef;
+    my $totdist = 0;
+    print "        points = [";
+    foreach my $point (@{$points}) {
+	my $lat = $point->{'lat'};
+	my $lon = $point->{'lon'};
+	my $ele = $point->{'ele'};
+	my $comment = $point->{'comment'};
+	my $time = $point->{'time'};
+	my $tsec = $point->{'tsec'};
+	my $uph = undef;
+
+	if ($count > 0) {
+	    print ",\n                  ";
+
+	    # See http://en.wikipedia.org/wiki/Earth_radius
+	    my $a = $eradius;
+	    my $b = $pradius;
+	    my $a2 = $a * $a;
+	    my $b2 = $b * $b;
+	    my $cos2l = cos(deg2rad(90 - $plat));
+	    $cos2l = $cos2l * $cos2l;
+	    my $radius = ($a*$b) / sqrt($a2 - (($a2-$b2) * $cos2l));
+
+	    my $u = great_circle_distance(deg2rad($plon), deg2rad(90 - $plat),
+					  deg2rad($lon), deg2rad(90 - $lat),
+					  $radius);
+	    $totdist += $u;
+	    $uph = $u/(($tsec-$psec)/3600)
+		if defined($tsec) && defined($psec);
+	}
+
+	$plat = $lat;
+	$plon = $lon;
+	$psec = $tsec;
+
+	$count++;
+	if (defined($uph)) {
+	    printf ("trkPt(%f, %f, %f, \"%s\", %f, %f, %d,\"%s\")",
+		    $point->{'lat'}, $point->{'lon'}, $point->{'ele'},
+		    $point->{'time'}, $totdist, $uph, $point->{'count'},$point->{'comment'});
+	} else {
+	    printf ("trkPt(%f, %f, %f, \"%s\", %f, \"%s\", %d,\"%s\")",
+		    $point->{'lat'}, $point->{'lon'}, $point->{'ele'},
+		    $point->{'time'}, $totdist, 'unk', $point->{'count'},$point->{'comment'});
+	}
+    }
+    print "];\n\n";
+
+    print "        for (var i = 0; i < points.length; i++) {\n";
+    print "           createPoint(points[i]);\n";
+    print "        }\n\n";
+
+    my $color = "#0000ff";
+    $color = "#ff0000" if $tcount == $trackcount;
+    print "        map.addOverlay(new GPolyline(points, \"$color\", 2));\n";
+    print "\n";
+}
+
+print <<EOF2;
+    }
+    //]]>
+    </script>
+  </body>
+
+</html>
+EOF2

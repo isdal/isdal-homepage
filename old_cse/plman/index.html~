@@ -1,0 +1,60 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<html>
+ <head>
+  <title>Planetlab experiment manager</title>
+ </head>
+ <body>
+<h1>PlanetLab experiment manager</h1>
+<a 
+As a part of the cplane project we have developed a tool to make is easier to deploy experiments and services on Planet-Lab.
+
+<h2>Screenshots</h2>
+<a href="/homes/isdal/plman/screens/mac_screenshot.jpg"><img src="/homes/isdal/plman/screens/mac_screenshot_smaller.jpg"></a>
+<a href="/homes/isdal/plman/screens/mac_screenshot2.jpg"><img src="/homes/isdal/plman/screens/mac_screenshot2_small.jpg"></a><br>
+<a href="/homes/isdal/plman/screens/screenshot_linux.png"><img src="/homes/isdal/plman/screens/screenshot_linux_small.png"></a>
+<a href="/homes/isdal/plman/screens/mac_screenshot.jpg"><img src="/homes/isdal/plman/screens/mac_screenshot_small.jpg"></a>
+
+<h2>Installation</h2>
+<ol>
+<li><b>download the zip file (either full or the platform specific version)</b></li>
+<li><b>unzip</b></li>
+<li><b>edit pl_manager.conf to reflect your info</b></li>
+<li><b>execute run_%your platform%.sh</b></li>
+<li>(If the controller is running already, but you want to attach a new instance of the gui, execute run_%your platform%_gui.sh)</li>
+</ol>
+
+
+<h2>Downloads</h2>
+<p>
+<b><a href="/homes/isdal/plman/PlMan.zip">Full download</a><br>
+<a href="/homes/isdal/plman/PlMan_win_x86.zip">Windows (32 bit)</a><br>
+<a href="/homes/isdal/plman/PlMan_mac.zip">Mac (Intel)</a><br>
+<a href="/homes/isdal/plman/PlMan_linux_x86.zip">Linux (32 bit)</a><br><br>
+<a href="/homes/isdal/plman/PlMan.jar">Only jar</a><br><br>
+<a href="/homes/isdal/plman/XmlRpcExample.pl">Perl Example</a><br>
+</b>
+<p>
+Java 1.5 is also required, <a href="http://java.com"> Download Java</a>
+
+<h2>Documentation</h2>
+
+<a href="/homes/isdal/plman/doc/">Javadoc</a><br>
+<a href="/homes/isdal/plman/doc/edu/washington/cs/pl_if/rpc/RpcFunctions.html">XML-RPC API</a>
+
+<h2>Change log</h2>
+INITIAL RELEASE:
+* easy interface for killing an application on all nodes
+* ability to add planetlab hosts to your slice (withour clicking 700 checkboxes)
+* added support for PLC 4.0
+* added support for "flat" and "hierarchical" naming of downloaded files
+* reliable download of data form planetlab hosts
+* save currenly connected hosts to file
+* connect to hosts specified in file
+* self-update from within app
+* XML-RPC for communication with Planetlab Central
+* Interface supporting both scripts and GUI
+* SWT gui running on linux, windows and mac
+* Reliable uploads of local directories
+* Failed connect policy, try: an other random node or another node in the same site
+* Specify maximum execution time for commands
+* Halt execuion on the node if previous command exited with non zero exit status

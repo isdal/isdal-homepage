@@ -1,0 +1,17 @@
+<config>
+<title>Mount Rainier Summit</title>
+<key>ABQIAAAA-7kWKxZItFjZVb6POJq0fhQzLurbfeB3lMr--VHOQrCi-mJjWxTEqIDb8uF5LpEylo2vUGGTLBdUjQ</key>
+<width>100%</width>
+<height>100%</height>
+<units>m</units>
+<colinear-threshold>0.0001</colinear-threshold>
+<icon>
+   var icon = new GIcon();
+   icon.image = "http://www.cs.washington.edu/homes/isdal/rainier/dot.png";
+   icon.shadow = "http://www.cs.washington.edu/homes/isdal/rainier/dot.png";
+   icon.iconSize = new GSize(3, 3);
+   icon.shadowSize = new GSize(3, 3);
+   icon.iconAnchor = new GPoint(1, 1);
+   icon.infoWindowAnchor = new GPoint(2, 0);
+</icon>
+</config>

@@ -1,0 +1,94 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<html>
+ <head>
+  <title>Planetlab experiment manager</title>
+ </head>
+ <body>
+<h1>PlanetLab experiment manager</h1>
+For planetary-scale testbeds, such as GENI/PlanetLab, to have the broadest possible impact in enabling experimental network and distributed systems research, they must be accessible to the broadest set of researchers, including those with a single PI working on a project with a single graduate student in a school with little prior institutional experience in building distributed systems. Unfortunately, this is not the case now, with these testbeds being hard to use for anyone who is not an expert programmer. A typical experience is that it takes a new user over a month to figure out how to write even the simplest PlanetLab program. 
+
+<h2>Screenshots</h2>
+<a href="/homes/isdal/plman/screens/mac_screenshot.jpg"><img src="/homes/isdal/plman/screens/mac_screenshot_small.jpg"></a>
+<a href="/homes/isdal/plman/screens/mac_screenshot2.jpg"><img src="/homes/isdal/plman/screens/mac_screenshot2_small.jpg"></a><br>
+<a href="/homes/isdal/plman/screens/screenshot_linux.png"><img src="/homes/isdal/plman/screens/screenshot_linux_small.png"></a>
+<a href="/homes/isdal/plman/screens/mac_screenshot.jpg"><img src="/homes/isdal/plman/screens/mac_screenshot_small.jpg"></a>
+
+<h2>Installation</h2>
+<ol>
+<li><b>download the zip file (either full or the platform specific version)</b></li>
+<li><b>unzip</b></li>
+<li><b>edit pl_manager.conf to reflect your info</b></li>
+<li><b>execute run_%your platform%.sh</b></li>
+<li>(If the controller is running already, but you want to attach a new instance of the gui, execute run_%your platform%_gui.sh)</li>
+</ol>
+
+
+<h2>Downloads</h2>
+<p>
+<b><a href="/homes/isdal/plman/PlMan.zip">Full download</a><br>
+<a href="/homes/isdal/plman/PlMan_win_x86.zip">Windows (32 bit)</a><br>
+<a href="/homes/isdal/plman/PlMan_mac.zip">Mac (Intel)</a><br>
+<a href="/homes/isdal/plman/PlMan_linux_x86.zip">Linux (32 bit)</a><br><br>
+<a href="/homes/isdal/plman/PlMan.jar">Only jar</a><br><br>
+<a href="/homes/isdal/plman/XmlRpcExample.pl">Perl Example</a><br>
+</b>
+<p>
+Java 1.5 is also required, <a href="http://java.com"> Download Java</a>
+
+<h2>Documentation</h2>
+<a href="/homes/isdal/plman/Tutorial/">Getting started tutorial</a><br>
+<a href="/homes/isdal/plman/doc/">Javadoc</a><br>
+<a href="/homes/isdal/plman/doc/edu/washington/cs/pl_if/rpc/RpcFunctions.html">XML-RPC API</a>
+
+<h2>Change log</h2>
+BUILD 20090708<br>
+* Adjusted the comon parser for the new format<br>
+* Made the comon parser more robust to changes in comon format<br>
+* Upgraded to use getNodes from the new plc api<br>
+<br>
+BUILD 20080617<br>
+* Added ability to specify the plc api address in the config file, this allows pl europe users to use plman.<br>
+<br>
+BUILD 20080403<br>
+* Added ability to connect to numbered hosts (example: from "node1.grp.proj.emulab.net" to "node50.grp.proj.emulab.net"), reachable from the connect menu<br>
+<br>
+BUILD 20080402<br>
+* Added support for OS X 10.5 (leopard)<br>
+** Worked around bug in OS X 10.5 (leopard) causing the classloader to not work when -XStartOnFirstThread is specified, bug described in https://bugs.eclipse.org/bugs/show_bug.cgi?id=211167 <br>
+** Worked around bug in SWT on OS X 10.5 (leopard) causing the UI thread to either get killed or freeze when the main thread finishes<br>
+<br>
+BUILD 20080227<br>
+* Fixed bug when connecting to plc using https through proxy, proxy support is still in experimental stage<br>
+<br>
+BUILD 20070925<br>
+* Added support for XMLRPC requests through http proxy<br>
+* Added ability to save all hosts that completed the last command to file<br>
+<br>
+BUILD 20070816<br>
+* Added support for x86 64 bit linux (experimental)<br>
+* Added support for ssh though http proxy<br>
+* Added ability to specify local xml rpc port in config file<br>
+<br>
+BUILD 20070523<br>
+* fixed bug that fired when connecting to hosts in file <br>
+* Displays a more detailed message when a connection fails<br>
+<br>
+BUILD 20070522<br>
+* added ability to add hosts in file to slice<br>
+<br>
+INITIAL RELEASE:<br>
+* easy interface for killing an application on all nodes<br>
+* ability to add planetlab hosts to your slice (without clicking 700 checkboxes)<br>
+* added support for PLC 4.0<br>
+* added support for "flat" and "hierarchical" naming of downloaded files<br>
+* reliable download of data from planetlab hosts<br>
+* save currently connected hosts to file<br>
+* connect to hosts specified in file<br>
+* self-update from within app<br>
+* XML-RPC for communication with Planetlab Central<br>
+* Interface supporting both scripts and GUI<br>
+* SWT gui running on linux, windows and mac<br>
+* Reliable uploads of local directories<br>
+* Failed connect policy, try: an other random node or another node in the same site<br>
+* Specify maximum execution time for commands<br>
+* Halt execution on the node if previous command exited with non zero exit status<br>

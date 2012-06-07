@@ -1,0 +1,48 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+            "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<title>MGMT - Kids</title>
+<style type="text/css">
+    body {
+        font-family: "Lucida Sans", "Lucida Grande", Verdana, Arial, sans-serif;
+        font-size: small;
+    }
+    h2,h3 {
+        margin-top: 16px;
+        margin-bottom: 4px;
+        padding: 0px;
+    }
+    dl {
+        margin: 0px;
+        padding-left: 4px;
+    }
+    dd {
+        margin: 0px;
+        padding-left: 16px;
+    }
+    ul {
+        margin: 0px;
+        padding-left: 16px;
+    }
+    li {
+       padding-bottom: 8px;
+    }
+    p {
+     padding-left: 4px;
+    }
+    .body {
+        width:600px;
+        margin-left: auto ;
+        margin-right: auto ;
+    }
+</style>
+</head>
+<body>
+<object width="640" height="480" id="uvp_fop" allowFullScreen="true"><param name="movie" value="http://d.yimg.com/m/up/fop/embedflv/swf/fop.swf"/>
+<param name="flashVars" value="id=v217235562&amp;eID=1301797&amp;lang=us&amp;enableFullScreen=0&amp;shareEnable=1"/><param name="wmode" value="transparent"/>
+<embed height="480" width="640" id="uvp_fop" allowFullScreen="true" src="http://d.yimg.com/m/up/fop/embedflv/swf/fop.swf" type="application/x-shockwave-flash" flashvars="id=v217235562&amp;eID=1301797&amp;lang=us&amp;ympsc=4195329&amp;enableFullScreen=1&amp;shareEnable=0" /></object>
+
+</body>
+</html>

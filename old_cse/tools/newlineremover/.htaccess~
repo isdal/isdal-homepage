@@ -1,0 +1,11 @@
+Options  +FollowSymLinks
+   order deny,allow
+   deny from none
+   allow from all 
+
+RedirectMatch 301 ^/homes/isdal/$ http://isd.al/
+
+#RewriteEngine on
+#RewriteRule ^/homes/isdal/(.*) http://isd.al/$1 [R=302,L]
+#RewriteRule (.*) http://isd.al/ [R=302,L]
+

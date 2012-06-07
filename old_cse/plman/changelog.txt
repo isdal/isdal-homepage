@@ -1,0 +1,51 @@
+BUILD 20090708
+* Adjusted the comon parser for the new format
+* Made the comon parser more robust to changes in comon format
+* Upgraded to use getNodes from the new plc api
+
+BUILD 20080617
+* Added ability to specify the plc api address in the config file, this allows pl europe users to use plman.
+
+BUILD 20080403
+* Added ability to connect to numbered hosts (example: from "node1.grp.proj.emulab.net" to "node50.grp.proj.emulab.net"), reachable from the connect menu
+
+BUILD 20080402
+* Added support for OS X 10.5 (leopard)
+** Worked around bug in OS X 10.5 (leopard) causing the classloader to not work when -XStartOnFirstThread is specified, bug described in https://bugs.eclipse.org/bugs/show_bug.cgi?id=211167 
+** Worked around bug in SWT on OS X 10.5 (leopard) causing the UI thread to either get killed or freeze when the main thread finishes
+
+BUILD 20080227
+* Fixed bug when connecting to plc using https through proxy, proxy support is still in experimental stage
+
+BUILD 20070925
+* Added support for XMLRPC requests through http proxy
+* Added ability to save all hosts that completed the last command to file
+
+BUILD 20070816
+* Added support for x86 64 bit linux (experimental)
+* Added support for ssh though http proxy
+* Added ability to specify local xml rpc port in config file
+
+BUILD 20070523
+* fixed bug that fired when connecting to hosts in file 
+* Displays a more detailed message when a connection fails
+
+BUILD 20070522
+* added ability to add hosts in file to slice
+
+INITIAL RELEASE:
+* easy interface for killing an application on all nodes
+* ability to add planetlab hosts to your slice (without clicking 700 checkboxes)
+* added support for PLC 4.0
+* added support for "flat" and "hierarchical" naming of downloaded files
+* reliable download of data from planetlab hosts
+* save currently connected hosts to file
+* connect to hosts specified in file
+* self-update from within app
+* XML-RPC for communication with Planetlab Central
+* Interface supporting both scripts and GUI
+* SWT gui running on linux, windows and mac
+* Reliable uploads of local directories
+* Failed connect policy, try: an other random node or another node in the same site
+* Specify maximum execution time for commands
+* Halt execution on the node if previous command exited with non zero exit status
