@@ -26,6 +26,8 @@ var channelKeys =[];
 //  src="http://api.thingspeak.com/channels/8652/charts/3?width=1300&height=520&results=1000&dynamic=false&title=15minTotals%20(0.5mm)" ></iframe>
 channelKeys.push({channelNumber:43590, name:'Thermostat',key:'',
    fieldList:[{field:1,axis:'T'},{field:2,axis:'T'},{field:3,axis:'P'},{field:4,axis:'T'}]});
+channelKeys.push({channelNumber:208243, name:'Nest',key:'',
+   fieldList:[{field:1,axis:'T'},{field:2,axis:'T'},{field:3,axis:'P'}]});
     
 // user's timezone offset
 var myOffset = new Date().getTimezoneOffset();
@@ -265,7 +267,7 @@ $(document).ready(function()
         text: 'Temperature (℃)'
       },
       id: 'T',
-      max: 35,
+      max: 30,
       min: 10,
       opposite: true,
     },{
